@@ -1,0 +1,3 @@
+include "redis-messenger-core"
+include "redis-messenger-application"
+include "redis-embedded-server"

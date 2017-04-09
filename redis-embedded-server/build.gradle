@@ -1,0 +1,21 @@
+apply plugin: "application"
+
+mainClassName = "ru.redisMessenger.server.Server"
+
+dependencies{
+    compile "com.github.kstyrc:embedded-redis:$embeddedRedisVersion"
+}
+
+jar {
+    baseName = "redis-embedded-server"
+    version = "0.0.0.1"
+
+    from {
+        (configurations.runtime).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    manifest {
+        attributes("Main-Class": "$mainClassName" )
+    }
+}

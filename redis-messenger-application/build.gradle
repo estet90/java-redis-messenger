@@ -1,0 +1,23 @@
+apply plugin: "application"
+
+mainClassName = "ru.redisMessenger.application.Application"
+
+dependencies{
+    compile project(":redis-messenger-core")
+
+    compile "redis.clients:service:$jedisVersion"
+}
+
+jar {
+    baseName = "redis-messenger-application"
+    version = "0.0.0.1"
+
+    from {
+        (configurations.runtime).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    manifest {
+        attributes("Main-Class": "$mainClassName" )
+    }
+}

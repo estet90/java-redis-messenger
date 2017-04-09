@@ -1,0 +1,12 @@
+jar {
+    baseName = "redis-messenger-core"
+    version = "0.0.0.1"
+}
+
+dependencies{
+    compile "org.projectlombok:lombok:$lombokVersion"
+    compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    compile "org.apache.logging.log4j:log4j-api:$log4j2Version"
+    compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
+    compile "joda-time:joda-time:$jodaTimeVersion"
+}

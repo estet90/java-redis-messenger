@@ -1,0 +1,18 @@
+ext.lombokVersion = "1.16.14"
+ext.jedisVersion = "2.9.0"
+ext.log4j2Version = "2.6.2"
+ext.jacksonVersion = "2.9.0.pr2"
+ext.jodaTimeVersion = "2.9.6"
+ext.embeddedRedisVersion = "0.6"
+
+group "ru.redisMessenger"
+version "0.0.0.1"
+
+subprojects {
+    apply plugin: "java"
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {url "https://mvnrepository.com/artifact/org.projectlombok/lombok"}
+    }
+}
