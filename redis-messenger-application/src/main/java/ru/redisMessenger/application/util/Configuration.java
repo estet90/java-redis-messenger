@@ -33,8 +33,8 @@ public class Configuration {
     private static volatile Configuration instance;
 
     /**
-     * method for get instance of Configuration
-     * @return current instance of Configuration
+     * method for get instance of {@link Configuration}
+     * @return {@link Configuration} current instance of Configuration
      */
     public static Configuration getInstance() {
         if (instance == null)
@@ -46,13 +46,16 @@ public class Configuration {
 
     /**
      * get property
-     * @param propertyName name of property
-     * @return value of property
+     * @param propertyName {@link String} name of property
+     * @return {@link String} value of property
      */
     public String getProperty(String propertyName){
         return properties.get(propertyName).toString();
     }
 
+    /**
+     * enum with properties
+     */
     public enum Property{
         REDIS_HOST("redis.host"), REDIS_PORT("redis.port"), FILE_OUTPUT_DIRECTORY("file.output.directory"), REDIS_KEY_USERS("redis.key.users"),
         REDIS_KEY_MESSAGES_PREFIX("redis.key.messages.prefix"), REDIS_KEY_USER_PREFIX("redis.key.user.prefix"), REDIS_CHANNEL_CHAT_PREFIX("redis.channel.chat.prefix"),

@@ -1,10 +1,14 @@
 package ru.redisMessenger.application.exception;
 
 /**
- * Created by admin on 08.04.2017.
+ * custom exception class
  */
 public class RedisMessengerException extends Exception {
 
+    /**
+     * constructor
+     * @param errorMessage {@link String}
+     */
     public RedisMessengerException(String errorMessage) {
         super(errorMessage);
     }

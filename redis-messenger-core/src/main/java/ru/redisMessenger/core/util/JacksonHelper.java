@@ -21,7 +21,7 @@ public class JacksonHelper<T> {
 
     /**
      * default constructor
-     * @param filterProvider contains ignorable fields
+     * @param filterProvider {@link FilterProvider} contains ignorable fields
      */
     public JacksonHelper(FilterProvider filterProvider){
         this.mapper = new ObjectMapper();
@@ -30,8 +30,8 @@ public class JacksonHelper<T> {
 
     /**
      * Object -> String
-     * @param object POJO
-     * @return serializedObject
+     * @param object {@link java.lang.invoke.MethodHandleImpl.BindCaller.T} POJO
+     * @return {@link String} serializedObject
      * @throws JsonProcessingException when object is incorrect
      */
     public String getSerializedObject(T object) throws JsonProcessingException {
@@ -42,8 +42,8 @@ public class JacksonHelper<T> {
 
     /**
      * Collecion<Object> -> Set<String>
-     * @param objects POJO
-     * @return set of serialized objects
+     * @param objects {@link Collection<java.lang.invoke.MethodHandleImpl.BindCaller.T>} POJO
+     * @return {@link Set<String>} set of serialized objects
      * @throws JsonProcessingException when objects are incorrect
      */
     public Set<String> getSerializedObjects(Collection<T> objects) throws JsonProcessingException {
@@ -55,9 +55,9 @@ public class JacksonHelper<T> {
 
     /**
      * String -> Object
-     * @param objectStr object as String
-     * @param clazz target class
-     * @return deserialized object
+     * @param objectStr {@link String} object
+     * @param clazz {@link Class} target class
+     * @return {@link java.lang.invoke.MethodHandleImpl.BindCaller.T} deserialized object
      * @throws IOException when readValue
      */
     public T getDeserializedObject(String objectStr, Class<T> clazz) throws IOException {
@@ -68,9 +68,9 @@ public class JacksonHelper<T> {
 
     /**
      * Collection<String> -> Set<Object>
-     * @param objectsStr objects as Collection<String>
-     * @param clazz target class
-     * @return set of deserialized object
+     * @param objectsStr {@link Set<String>} objects
+     * @param clazz {@link Class} target class
+     * @return {@link Set<java.lang.invoke.MethodHandleImpl.BindCaller.T>} set of deserialized object
      * @throws IOException when readValue
      */
     public Set<T> getDeserializedObjects(Collection<String> objectsStr, Class<T> clazz) throws IOException {

@@ -14,6 +14,9 @@ public class JedisClient {
 
     private Jedis jedis;
 
+    /**
+     * default constructor
+     */
     private JedisClient(){
         String redisHost = Configuration.getInstance().getProperty(Configuration.Property.REDIS_HOST.getPropertyName());
         int redisPort = Integer.parseInt(Configuration.getInstance().getProperty(Configuration.Property.REDIS_PORT.getPropertyName()));
@@ -26,6 +29,10 @@ public class JedisClient {
 
     private static volatile JedisClient instance;
 
+    /**
+     * method for get instance of {@link JedisClient}
+     * @return {@link JedisClient}
+     */
     public static JedisClient getInstance(){
         if (instance == null)
             synchronized (JedisClient.class){
@@ -36,8 +43,8 @@ public class JedisClient {
 
     /**
      * get value by key
-     * @param key for value
-     * @return value
+     * @param key {@link String} for value
+     * @return {@link String} value
      */
     public String getValue(String key){
         String value = jedis.get(key);
@@ -50,9 +57,9 @@ public class JedisClient {
 
     /**
      * set value
-     * @param key for value
-     * @param value string for insert/update
-     * @return status
+     * @param key {@link String} for value
+     * @param value {@link String} string for insert/update
+     * @return {@link String} status
      */
     public String setValue(String key, String value){
         String status = jedis.set(key, value);
@@ -62,8 +69,8 @@ public class JedisClient {
 
     /**
      * get keys by pattern
-     * @param pattern for search
-     * @return keys
+     * @param pattern {@link String} for search
+     * @return {@link Set<String>} keys
      */
     public Set<String> getKeys(String pattern){
         Set<String> keys = jedis.keys(pattern);
@@ -73,8 +80,8 @@ public class JedisClient {
 
     /**
      * get set of values
-     * @param key for values
-     * @return values
+     * @param key {@link String} for values
+     * @return {@link Set<String>} values
      */
     public Set<String> getValues(String key){
         Set<String> values = jedis.smembers(key);
@@ -87,9 +94,9 @@ public class JedisClient {
 
     /**
      * put values
-     * @param key for values
-     * @param values in set
-     * @return countInsertedValues
+     * @param key {@link String} for values
+     * @param values {@link String[]}
+     * @return {@link Long} countInsertedValues
      */
     public Long putValues(String key, String[] values){
         Long countInsertedValues = jedis.sadd(key, values);
@@ -99,9 +106,9 @@ public class JedisClient {
 
     /**
      * create hash value
-     * @param key hash name
-     * @param field hash field
-     * @param value for create
+     * @param key {@link String} hash name
+     * @param field {@link String} hash field
+     * @param value {@link String} for create
      */
     public Long createHashValue(String key, String field, String value){
         Long countInsertedValues = jedis.hset(key, field, value);
@@ -111,8 +118,8 @@ public class JedisClient {
 
     /**
      * get hash value
-     * @param key hash name
-     * @param field hash field
+     * @param key {@link String} hash name
+     * @param field {@link String} hash field
      * @return hashValue
      */
     public String getHashValue(String key, String field){
@@ -121,6 +128,11 @@ public class JedisClient {
         return hashValue;
     }
 
+    /**
+     * get hash keys
+     * @param key {@link String}
+     * @return {@link Set<String>}
+     */
     public Set<String> getHashKeys(String key){
         Set<String> keys = jedis.hkeys(key);
         log.info("HKEYS\nfound {} keys:\n{}", keys.size(), keys);
@@ -129,8 +141,8 @@ public class JedisClient {
 
     /**
      * publish messages
-     * @param channel for publish
-     * @param message for publish
+     * @param channel {@link String} for publish
+     * @param message {@link String} for publish
      * @return countPublishedMessages
      */
     public Long publish(String channel, String message){
@@ -141,7 +153,7 @@ public class JedisClient {
 
     /**
      * subscribe to channel
-     * @param channel for subscribe
+     * @param channel {@link String} for subscribe
      */
     public void subscribe(String channel){
         jedis.subscribe(new Subscriber(), channel);

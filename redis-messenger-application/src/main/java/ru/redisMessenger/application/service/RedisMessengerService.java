@@ -38,7 +38,7 @@ public class RedisMessengerService {
 
     /**
      * get user by name and class
-     * @param userKey {@link String} "user:{@link User}.getClass.getSimpleName:{@link User}.getName"
+     * @param userKey {@link String} userKey({@link String} user)
      * @return {@link User} as {@link String}
      * @throws RedisMessengerException when user doesn't exist
      */
@@ -51,8 +51,8 @@ public class RedisMessengerService {
 
     /**
      * add new {@link User}
-     * @param user {@link User}
-     * @return userKey "user:{@link User}.getClass.getSimpleName:{@link User}.getName"
+     * @param user {@link User} created user
+     * @return userKey {@link String} userKey({@link String} user)
      * @throws RedisMessengerException when {@link User} is existing or incorrect
      */
     public String addUser(User user) throws RedisMessengerException {
@@ -144,7 +144,7 @@ public class RedisMessengerService {
 
     /**
      * get all {@link User} by key "{@link Configuration}.getProperty()"
-     * @return
+     * @return {@link Set<String>}
      */
     public Set<String> getUsers() {
         return JedisClient.getInstance().getValues(REDIS_KEY_USERS_PROPERTY);
@@ -152,11 +152,11 @@ public class RedisMessengerService {
 
     /**
      *
-     * @param hashUserFromKey
-     * @param hashUserToKey
-     * @param actionUserFromKey
-     * @param actionUserToKey
-     * @param hashValue
+     * @param hashUserFromKey {@link String} hashUserKey({@link String} userFromKey)
+     * @param hashUserToKey {@link String} hashUserKey({@link String} userToKey)
+     * @param actionUserFromKey {@link String} messagesUserKey({@link String} userFromKey) or chatUserKey({@link String} userFromKey)
+     * @param actionUserToKey {@link String} messagesUserKey({@link String} userToKey) or chatUserKey({@link String} userToKey)
+     * @param hashValue {@link String} userKey({@link String} user)
      */
     private void checkHashKeys(String hashUserFromKey, String hashUserToKey, String actionUserFromKey, String actionUserToKey, String hashValue) {
         if (!JedisClient.getInstance().getHashKeys(hashUserFromKey).contains(actionUserToKey))
@@ -165,26 +165,58 @@ public class RedisMessengerService {
             JedisClient.getInstance().createHashValue(hashUserToKey, actionUserFromKey, hashValue);
     }
 
+    /**
+     * redis key
+     * @param userFromKey {@link String} current user
+     * @param userToKey {@link String} contact
+     * @return {@link String}
+     */
     private String messagesUsersKey(String userFromKey, String userToKey) {
         return REDIS_KEY_MESSAGES_PREFIX_PROPERTY.concat(userFromKey).concat(":").concat(userToKey);
     }
 
+    /**
+     * redis key
+     * @param userToKey {@link String} contact
+     * @return {@link String}
+     */
     private String messagesUserKey(String userToKey) {
         return REDIS_KEY_MESSAGES_PREFIX_PROPERTY.concat(userToKey);
     }
 
+    /**
+     * redis key
+     * @param userFromKey {@link String} current user
+     * @return {@link String}
+     */
     private String hashUserKey(String userFromKey) {
         return REDIS_HASH_PREFIX_PROPERTY.concat(userFromKey);
     }
 
+    /**
+     * redis key
+     * @param user {@link String} any user
+     * @return {@link String}
+     */
     private String userKey(User user) {
         return REDIS_KEY_USER_PREFIX_PROPERTY.concat(user.getClass().getSimpleName()).concat(":").concat(user.getName());
     }
 
+    /**
+     * redis key
+     * @param userFromKey {@link String} current user
+     * @param userToKey {@link String} contact
+     * @return {@link String}
+     */
     private String chatUsersChannel(String userFromKey, String userToKey) {
         return REDIS_CHANNEL_CHAT_PREFIX_PROPERTY.concat(userFromKey).concat(":").concat(userToKey);
     }
 
+    /**
+     * redis key
+     * @param userToKey {@link String} contact
+     * @return {@link String}
+     */
     private String chatUserChannel(String userToKey) {
         return REDIS_CHANNEL_CHAT_PREFIX_PROPERTY.concat(userToKey);
     }
