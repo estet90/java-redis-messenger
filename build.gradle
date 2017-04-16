@@ -4,6 +4,7 @@ ext.log4j2Version = "2.6.2"
 ext.jacksonVersion = "2.9.0.pr2"
 ext.jodaTimeVersion = "2.9.6"
 ext.embeddedRedisVersion = "0.6"
+ext.junitVersion = "4.12"
 
 group "ru.redisMessenger"
 version "0.0.0.1"

@@ -220,7 +220,7 @@ public class RedisMessengerService {
      * @return {@link String}
      */
     private String messagesUsersKey(String userFromKey, String userToKey) {
-        return REDIS_KEY_MESSAGES_PREFIX_PROPERTY.concat(userFromKey).concat(":").concat(userToKey);
+        return String.join(":", REDIS_KEY_MESSAGES_PREFIX_PROPERTY, userFromKey, userToKey);
     }
 
     /**
@@ -229,7 +229,7 @@ public class RedisMessengerService {
      * @return {@link String}
      */
     private String messagesUserKey(String userToKey) {
-        return REDIS_KEY_MESSAGES_PREFIX_PROPERTY.concat(userToKey);
+        return String.join(":", REDIS_KEY_MESSAGES_PREFIX_PROPERTY, userToKey);
     }
 
     /**
@@ -238,7 +238,7 @@ public class RedisMessengerService {
      * @return {@link String}
      */
     private String hashUserKey(String userFromKey) {
-        return REDIS_HASH_PREFIX_PROPERTY.concat(userFromKey);
+        return String.join(":", REDIS_HASH_PREFIX_PROPERTY, userFromKey);
     }
 
     /**
@@ -247,7 +247,7 @@ public class RedisMessengerService {
      * @return {@link String}
      */
     private String userKey(User user) {
-        return REDIS_KEY_USER_PREFIX_PROPERTY.concat(user.getClass().getSimpleName()).concat(":").concat(user.getName());
+        return String.join(":", REDIS_KEY_USER_PREFIX_PROPERTY, user.getClass().getSimpleName(), user.getName());
     }
 
     /**
@@ -257,7 +257,7 @@ public class RedisMessengerService {
      * @return {@link String}
      */
     private String chatUsersChannel(String userFromKey, String userToKey) {
-        return REDIS_CHANNEL_CHAT_PREFIX_PROPERTY.concat(userFromKey).concat(":").concat(userToKey);
+        return String.join(":", REDIS_CHANNEL_CHAT_PREFIX_PROPERTY, userFromKey, userToKey);
     }
 
     /**
@@ -266,7 +266,7 @@ public class RedisMessengerService {
      * @return {@link String}
      */
     private String chatUserChannel(String userToKey) {
-        return REDIS_CHANNEL_CHAT_PREFIX_PROPERTY.concat(userToKey);
+        return String.join(":", REDIS_CHANNEL_CHAT_PREFIX_PROPERTY, userToKey);
     }
 
 }

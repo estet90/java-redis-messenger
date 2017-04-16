@@ -317,7 +317,7 @@ class UserActionHandler {
         LocalDateTime date = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddhhmmssSSS");
         String dateStr = date.format(formatter);
-        return FILE_OUTPUT_DIRECTORY_PROPERTY.concat(currentUser.getName()).concat("_").concat(contact.getName()).concat("_").concat(dateStr).concat(".txt");
+        return String.join("_", FILE_OUTPUT_DIRECTORY_PROPERTY, currentUser.getName(), contact.getName(), dateStr).concat(".txt");
     }
 
     /**
