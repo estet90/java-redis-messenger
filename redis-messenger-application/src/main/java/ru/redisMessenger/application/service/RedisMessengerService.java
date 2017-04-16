@@ -12,6 +12,7 @@ import ru.redisMessenger.core.entities.Message;
 import ru.redisMessenger.core.entities.User;
 import ru.redisMessenger.core.util.JacksonHelper;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Set;
 
@@ -30,7 +31,7 @@ public class RedisMessengerService {
     private static final String[] MESSAGE_IGNORABLE_FILTER = new String[]{"messages"};
     private static final String[] USER_DETAILS_IGNORABLE_FILTER = new String[]{"messages", "description", "dateCreate", "rights"};
 
-    public static final FilterProvider USER_ONLY_FILTER_PROVIDER = new SimpleFilterProvider()
+    private static final FilterProvider USER_ONLY_FILTER_PROVIDER = new SimpleFilterProvider()
             .addFilter("User", SimpleBeanPropertyFilter.serializeAllExcept(MESSAGE_IGNORABLE_FILTER));
     private static final FilterProvider MESSAGES_FILTER_PROVIDER = new SimpleFilterProvider()
             .addFilter("User", SimpleBeanPropertyFilter.serializeAllExcept(USER_DETAILS_IGNORABLE_FILTER))
@@ -42,11 +43,11 @@ public class RedisMessengerService {
      * @return {@link User} as {@link String}
      * @throws RedisMessengerException when user doesn't exist
      */
-    public String getUser(String userKey) throws RedisMessengerException {
+    public User getUser(String userKey) throws RedisMessengerException, IOException {
         String userValue = JedisClient.getInstance().getValue(userKey);
         if (userValue == null)
             throw new RedisMessengerException("user with userKey ".concat(userKey).concat(" doesn't exist"));
-        return userValue;
+        return new JacksonHelper<User>(USER_ONLY_FILTER_PROVIDER).getDeserializedObject(userValue, User.class);
     }
 
     /**
@@ -56,8 +57,8 @@ public class RedisMessengerService {
      * @throws RedisMessengerException when {@link User} is existing or incorrect
      */
     public String addUser(User user) throws RedisMessengerException {
-        if (user.getName() == null || user.getDescription() == null)
-            throw new RedisMessengerException("all fields must be filled");
+        if (user.getName() == null)
+            throw new RedisMessengerException("username must be filled");
         String userKey = userKey(user);
         if (JedisClient.getInstance().getValue(userKey) != null)
             throw new RedisMessengerException("user with userKey ".concat(userKey).concat(" already exists"));
@@ -102,16 +103,40 @@ public class RedisMessengerService {
         String messagesUserFromKey = messagesUserKey(userFromKey);
         String messagesUserToKey = messagesUserKey(userToKey);
 
-        String messagesUsersKey = messagesUsersKey(userFromKey, userToKey);
-        checkHashKeys(hashUserFromKey, hashUserToKey, messagesUserFromKey, messagesUserToKey, messagesUsersKey);
-        JedisClient.getInstance().putValues(JedisClient.getInstance().getHashValue(hashUserFromKey, messagesUserToKey), new String[]{messageValue});
+        String messagesUsersFromToKey = messagesUsersKey(userFromKey, userToKey);
+
+        String userFromToKey = JedisClient.getInstance().getHashValue(hashUserFromKey, messagesUserToKey);
+        if (userFromToKey != null)
+            JedisClient.getInstance().putValues(userFromToKey, new String[]{messageValue});
+        else {
+            String userToFromKey = JedisClient.getInstance().getHashValue(hashUserToKey, messagesUserFromKey);
+            if (userToFromKey != null)
+                JedisClient.getInstance().putValues(userToFromKey, new String[]{messageValue});
+            else {
+                JedisClient.getInstance().createHashValue(hashUserFromKey, messagesUserToKey, messagesUsersFromToKey);
+                JedisClient.getInstance().createHashValue(hashUserToKey, messagesUserFromKey, messagesUsersFromToKey);
+                JedisClient.getInstance().putValues(messagesUsersFromToKey, new String[]{messageValue});
+            }
+        }
 
         String chatUserFromChannel = chatUserChannel(userFromKey);
         String chatUserToChannel = chatUserChannel(userToKey);
 
-        String chatUsersChannel = chatUsersChannel(userFromKey, userToKey);
-        checkHashKeys(hashUserFromKey, hashUserToKey, chatUserFromChannel, chatUserToChannel, chatUsersChannel);
-        JedisClient.getInstance().publish(JedisClient.getInstance().getHashValue(hashUserFromKey, chatUserToChannel), messageValue);
+        String chatUsersFromToChannel = chatUsersChannel(userFromKey, userToKey);
+
+        userFromToKey = JedisClient.getInstance().getHashValue(hashUserFromKey, chatUserToChannel);
+        if (userFromToKey != null)
+            JedisClient.getInstance().publish(userFromToKey, messageValue);
+        else {
+            String userToFromKey = JedisClient.getInstance().getHashValue(hashUserToKey, chatUserFromChannel);
+            if (userToFromKey != null)
+                JedisClient.getInstance().publish(userToFromKey, messageValue);
+            else {
+                JedisClient.getInstance().createHashValue(hashUserFromKey, chatUserToChannel, chatUsersFromToChannel);
+                JedisClient.getInstance().createHashValue(hashUserToKey, chatUserFromChannel, chatUsersFromToChannel);
+                JedisClient.getInstance().publish(chatUsersFromToChannel, messageValue);
+            }
+        }
         return messageValue;
     }
 
@@ -124,9 +149,28 @@ public class RedisMessengerService {
     public Set<String> getMessages(User userFrom, User userTo) {
         String userFromKey = userKey(userFrom);
         String userToKey = userKey(userTo);
-        String messagesUsersKey = messagesUsersKey(userFromKey, userToKey);
-        checkHashKeys(hashUserKey(userFromKey), hashUserKey(userToKey), messagesUserKey(userFromKey), messagesUserKey(userToKey), messagesUsersKey);
-        return JedisClient.getInstance().getValues(messagesUsersKey);
+
+        String messagesUserFromKey = messagesUserKey(userFromKey);
+        String messagesUserToKey = messagesUserKey(userToKey);
+
+        String hashUserFromKey = hashUserKey(userFromKey);
+        String hashUserToKey = hashUserKey(userToKey);
+
+        String messagesUsersFromToKey = messagesUsersKey(userFromKey, userToKey);
+
+        String userFromToKey = JedisClient.getInstance().getHashValue(hashUserFromKey, messagesUserToKey);
+        if (userFromToKey != null)
+            return JedisClient.getInstance().getValues(userFromToKey);
+        else {
+            String userToFromKey = JedisClient.getInstance().getHashValue(hashUserToKey, messagesUserFromKey);
+            if (userToFromKey != null)
+                return JedisClient.getInstance().getValues(userToFromKey);
+            else {
+                JedisClient.getInstance().createHashValue(hashUserFromKey, messagesUserToKey, messagesUsersFromToKey);
+                JedisClient.getInstance().createHashValue(hashUserToKey, messagesUserFromKey, messagesUsersFromToKey);
+                return JedisClient.getInstance().getValues(messagesUsersFromToKey);
+            }
+        }
     }
 
     /**
@@ -137,32 +181,36 @@ public class RedisMessengerService {
     public void subscribe(User userFrom, User userTo) {
         String userFromKey = userKey(userFrom);
         String userToKey = userKey(userTo);
-        String chatUsersChannel = chatUsersChannel(userFromKey, userToKey);
-        checkHashKeys(hashUserKey(userFromKey), hashUserKey(userToKey), chatUserChannel(userFromKey), chatUserChannel(userToKey), chatUsersChannel);
-        JedisClient.getInstance().subscribe(chatUsersChannel);
+
+        String chatUserFromChannel = chatUserChannel(userFromKey);
+        String chatUserToChannel = chatUserChannel(userToKey);
+
+        String hashUserFromKey = hashUserKey(userFromKey);
+        String hashUserToKey = hashUserKey(userToKey);
+
+        String chatUsersFromToChannel = chatUsersChannel(userFromKey, userToKey);
+
+        String userFromToKey = JedisClient.getInstance().getHashValue(hashUserFromKey, chatUserToChannel);
+        if (userFromToKey != null)
+            JedisClient.getInstance().subscribe(userFromToKey);
+        else {
+            String userToFromKey = JedisClient.getInstance().getHashValue(hashUserToKey, chatUserFromChannel);
+            if (userToFromKey != null)
+                JedisClient.getInstance().subscribe(userToFromKey);
+            else {
+                JedisClient.getInstance().createHashValue(hashUserFromKey, chatUserToChannel, chatUsersFromToChannel);
+                JedisClient.getInstance().createHashValue(hashUserToKey, chatUserFromChannel, chatUsersFromToChannel);
+                JedisClient.getInstance().subscribe(chatUsersFromToChannel);
+            }
+        }
     }
 
     /**
-     * get all {@link User} by key "{@link Configuration}.getProperty()"
+     * get keys of users
      * @return {@link Set<String>}
      */
-    public Set<String> getUsers() {
+    public Set<String> getUsersKeys() {
         return JedisClient.getInstance().getValues(REDIS_KEY_USERS_PROPERTY);
-    }
-
-    /**
-     *
-     * @param hashUserFromKey {@link String} hashUserKey({@link String} userFromKey)
-     * @param hashUserToKey {@link String} hashUserKey({@link String} userToKey)
-     * @param actionUserFromKey {@link String} messagesUserKey({@link String} userFromKey) or chatUserKey({@link String} userFromKey)
-     * @param actionUserToKey {@link String} messagesUserKey({@link String} userToKey) or chatUserKey({@link String} userToKey)
-     * @param hashValue {@link String} userKey({@link String} user)
-     */
-    private void checkHashKeys(String hashUserFromKey, String hashUserToKey, String actionUserFromKey, String actionUserToKey, String hashValue) {
-        if (!JedisClient.getInstance().getHashKeys(hashUserFromKey).contains(actionUserToKey))
-            JedisClient.getInstance().createHashValue(hashUserFromKey, actionUserToKey, hashValue);
-        if (!JedisClient.getInstance().getHashKeys(hashUserToKey).contains(actionUserFromKey))
-            JedisClient.getInstance().createHashValue(hashUserToKey, actionUserFromKey, hashValue);
     }
 
     /**
@@ -220,22 +268,5 @@ public class RedisMessengerService {
     private String chatUserChannel(String userToKey) {
         return REDIS_CHANNEL_CHAT_PREFIX_PROPERTY.concat(userToKey);
     }
-    //        if (JedisClient.getInstance().getHashKeys(hashUserFromKey).contains(messagesUserToKey))
-//            JedisClient.getInstance().putValues(JedisClient.getInstance().getHashValue(hashUserFromKey, messagesUserToKey), new String[]{messageValue});
-//        else {
-//            JedisClient.getInstance().createHashValue(hashUserFromKey, messagesUserToKey, messagesUsersKey(userFromKey, userToKey));
-//            if (!JedisClient.getInstance().getHashKeys(hashUserToKey).contains(messagesUserFromKey))
-//                JedisClient.getInstance().createHashValue(hashUserToKey, messagesUserFromKey, messagesUsersKey(userFromKey, userToKey));
-//            JedisClient.getInstance().putValues(messagesUsersKey(userFromKey, userToKey), new String[]{messageValue});
-//        }
-//        //add message to publish
-//        if (JedisClient.getInstance().getHashKeys(hashUserFromKey).contains(chatUserToChannel))
-//            JedisClient.getInstance().publish(JedisClient.getInstance().getHashValue(hashUserFromKey, chatUserToChannel), messageValue);
-//        else {
-//            JedisClient.getInstance().createHashValue(hashUserFromKey, chatUserToChannel, chatUsersChannel(userFromKey, userToKey));
-//            if (!JedisClient.getInstance().getHashKeys(hashUserToKey).contains(chatUserFromChannel))
-//                JedisClient.getInstance().createHashValue(hashUserToKey, chatUserFromChannel, chatUsersChannel(userFromKey, userToKey));
-//            JedisClient.getInstance().publish(JedisClient.getInstance().getHashValue(hashUserFromKey, chatUserToChannel), messageValue);
-//        }
 
 }

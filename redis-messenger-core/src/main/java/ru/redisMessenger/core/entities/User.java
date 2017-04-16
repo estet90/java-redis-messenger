@@ -1,9 +1,6 @@
 package ru.redisMessenger.core.entities;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 import lombok.Data;
 
 import java.util.Date;
@@ -15,11 +12,15 @@ import java.util.List;
 @Data
 @JsonFilter("User")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_OBJECT, use = JsonTypeInfo.Id.NAME)
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = SimpleUser.class),
+        @JsonSubTypes.Type(value = AdvancedUser.class),
+        @JsonSubTypes.Type(value = SuperUser.class),
+})
 public abstract class User {
 
     private String name;
-    private String description;
     private List<Message> messages;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private Date dateCreate;

@@ -8,5 +8,4 @@ dependencies{
     compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
     compile "org.apache.logging.log4j:log4j-api:$log4j2Version"
     compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
-    compile "joda-time:joda-time:$jodaTimeVersion"
 }

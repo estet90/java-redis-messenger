@@ -5,7 +5,7 @@ mainClassName = "ru.redisMessenger.application.Application"
 dependencies{
     compile project(":redis-messenger-core")
 
-    compile "redis.clients:service:$jedisVersion"
+    compile "redis.clients:jedis:$jedisVersion"
 }
 
 jar {

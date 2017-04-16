@@ -49,9 +49,9 @@ public class JedisClient {
     public String getValue(String key){
         String value = jedis.get(key);
         if (value == null)
-            log.info("KEY\nvalue for key {} doesn't exist", key);
+            log.debug("KEY\nvalue for key {} doesn't exist", key);
         else
-            log.info("KEY\nget value {} by key {}", value, key);
+            log.debug("KEY\nget value {} by key {}", value, key);
         return value;
     }
 
@@ -63,7 +63,7 @@ public class JedisClient {
      */
     public String setValue(String key, String value){
         String status = jedis.set(key, value);
-        log.info("SET\nstatus of create value ({},{}) is {}", key, value, status);
+        log.debug("SET\nstatus of create value ({},{}) is {}", key, value, status);
         return status;
     }
 
@@ -74,7 +74,7 @@ public class JedisClient {
      */
     public Set<String> getKeys(String pattern){
         Set<String> keys = jedis.keys(pattern);
-        log.info("KEYS\nfound {} keys:\n{}", keys.size(), keys);
+        log.debug("KEYS\nfound {} keys by pattern {}:\n{}", keys.size(), pattern, keys);
         return  keys;
     }
 
@@ -86,9 +86,9 @@ public class JedisClient {
     public Set<String> getValues(String key){
         Set<String> values = jedis.smembers(key);
         if (values == null)
-            log.info("SMEMBERS\nvalue for key {} doesn't exist");
+            log.debug("SMEMBERS\nvalue for key {} doesn't exist");
         else
-            log.info("SMEMBERS\nget values {} by key {}", values, key);
+            log.debug("SMEMBERS\nget values {} by key {}", values, key);
         return values;
     }
 
@@ -100,7 +100,7 @@ public class JedisClient {
      */
     public Long putValues(String key, String[] values){
         Long countInsertedValues = jedis.sadd(key, values);
-        log.info("SADD\n{} values added to key {}", countInsertedValues, key);
+        log.debug("SADD\n{} values added to key {}", countInsertedValues, key);
         return  countInsertedValues;
     }
 
@@ -112,7 +112,7 @@ public class JedisClient {
      */
     public Long createHashValue(String key, String field, String value){
         Long countInsertedValues = jedis.hset(key, field, value);
-        log.info("HSET\n{} values added to field {} of key {}", countInsertedValues, field, key);
+        log.debug("HSET\n{} values {} added to field {} of key {}", value, countInsertedValues, field, key);
         return countInsertedValues;
     }
 
@@ -124,7 +124,7 @@ public class JedisClient {
      */
     public String getHashValue(String key, String field){
         String hashValue = jedis.hget(key, field);
-        log.info("HGET\nget hash value {} added by field {} of key {}", hashValue, field, key);
+        log.debug("HGET\nget hash value {} added by field {} of key {}", hashValue, field, key);
         return hashValue;
     }
 
@@ -135,7 +135,7 @@ public class JedisClient {
      */
     public Set<String> getHashKeys(String key){
         Set<String> keys = jedis.hkeys(key);
-        log.info("HKEYS\nfound {} keys:\n{}", keys.size(), keys);
+        log.debug("HKEYS\nfound {} keys:\n{}", keys.size(), keys);
         return keys;
     }
 
@@ -147,7 +147,7 @@ public class JedisClient {
      */
     public Long publish(String channel, String message){
         Long countPublishedMessages = jedis.publish(channel, message);
-        log.info("PUBLISH\n{} messages published to channel {}", countPublishedMessages, channel);
+        log.debug("PUBLISH\n{} messages published to channel {}", countPublishedMessages, channel);
         return countPublishedMessages;
     }
 
@@ -162,7 +162,7 @@ public class JedisClient {
     private class Subscriber extends JedisPubSub {
 
         public void onMessage(String channel, String message) {
-            log.info("SUBSCRIBE\nreceived a new message on channel {}:\n{}", channel, message);
+            log.debug("SUBSCRIBE\nreceived a new message on channel {}:\n{}", channel, message);
         }
 
         public void onSubscribe(String channel, int subscribedChannels) {

@@ -41,19 +41,6 @@ public class JacksonHelper<T> {
     }
 
     /**
-     * Collecion<Object> -> Set<String>
-     * @param objects {@link Collection<java.lang.invoke.MethodHandleImpl.BindCaller.T>} POJO
-     * @return {@link Set<String>} set of serialized objects
-     * @throws JsonProcessingException when objects are incorrect
-     */
-    public Set<String> getSerializedObjects(Collection<T> objects) throws JsonProcessingException {
-        Set<String> serializedObjects = new HashSet<>();
-        for (T object : objects)
-            serializedObjects.add(getSerializedObject(object));
-        return serializedObjects;
-    }
-
-    /**
      * String -> Object
      * @param objectStr {@link String} object
      * @param clazz {@link Class} target class
@@ -65,19 +52,4 @@ public class JacksonHelper<T> {
         log.debug("deserialize \n{} \nto {}", objectStr, clazz);
         return object;
     }
-
-    /**
-     * Collection<String> -> Set<Object>
-     * @param objectsStr {@link Set<String>} objects
-     * @param clazz {@link Class} target class
-     * @return {@link Set<java.lang.invoke.MethodHandleImpl.BindCaller.T>} set of deserialized object
-     * @throws IOException when readValue
-     */
-    public Set<T> getDeserializedObjects(Collection<String> objectsStr, Class<T> clazz) throws IOException {
-        Set<T> deserializedObjects = new HashSet<>();
-        for (String objectStr : objectsStr)
-            deserializedObjects.add(getDeserializedObject(objectStr, clazz));
-        return deserializedObjects;
-    }
-
 }
