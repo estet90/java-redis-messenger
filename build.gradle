@@ -6,7 +6,7 @@ ext.jodaTimeVersion = "2.9.6"
 ext.junitVersion = "4.12"
 
 group "ru.redisMessenger"
-version "0.0.0.1"
+version "1.0.0.0"
 
 subprojects {
     apply plugin: "java"

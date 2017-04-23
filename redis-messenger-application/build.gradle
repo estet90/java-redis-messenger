@@ -10,7 +10,7 @@ dependencies{
 
 jar {
     baseName = "redis-messenger-application"
-    version = "0.0.0.1"
+    version = "1.0.0.0"
 
     from {
         (configurations.runtime).collect {
