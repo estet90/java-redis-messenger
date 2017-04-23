@@ -24,49 +24,51 @@ class UserActionHandler {
     private User contact;
     private Set<String> commands;
 
-    private static final String REDIS_KEY_USER_PREFIX_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_KEY_USER_PREFIX.getPropertyName());
-    private static final String FILE_OUTPUT_DIRECTORY_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.FILE_OUTPUT_DIRECTORY.getPropertyName());
+    private final String REDIS_KEY_USER_PREFIX_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_KEY_USER_PREFIX.getPropertyName());
+    private final String FILE_OUTPUT_DIRECTORY_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.FILE_OUTPUT_DIRECTORY.getPropertyName());
 
-    private static final int COMMAND_STATUS_SUCCESS = 1;
-    private static final int COMMAND_STATUS_WARNING = 2;
-    private static final int COMMAND_STATUS_ERROR = 3;
+    private final int COMMAND_STATUS_SUCCESS = 1;
+    private final int COMMAND_STATUS_WARNING = 2;
+    private final int COMMAND_STATUS_ERROR = 3;
 
-    private static final String MESSAGE_INFO_OPEN_CONSOLE =     "============console opened==============";
-    private static final String MESSAGE_INFO_CLOSE_CONSOLE =    "============console closed==============";
-    private static final String MESSAGE_INFO_CREATED_USERS =    "=============created users==============";
-    private static final String MESSAGE_INFO_ENABLED_COMMANDS = "===========enabled commands=============";
-    private static final String MESSAGE_INFO_END =              "========================================";
-    private static final String MESSAGE_INFO_ENTER_THE_COMMAND = "enter the command -> ";
-    private static final String MESSAGE_ERROR_COMMAND_NOT_FOUND = "command not found";
-    private static final String MESSAGE_ERROR_USER_NOT_FOUND = "user not found";
-    private static final String MESSAGE_ERROR_USER_CLASS_NOT_FOUND = "user class not found";
-    private static final String MESSAGE_ERROR_USER_CLASS_NAME_CANNOT_BE_EMPTY = "user classname cannot be empty";
-    private static final String MESSAGE_ERROR_USER_NAME_CANNOT_BE_EMPTY = "user name cannot be empty";
-    private static final String MESSAGE_SUCCESS = "success!!!";
-    private static final String MESSAGE_WARNING = "warning!!!";
-    private static final String MESSAGE_ERROR = "error!!!";
-    private static final String MESSAGE_WARNING_NOT_FOUND_ANY_USERS = "not found any users";
-    private static final String MESSAGE_WARNING_TOO_SHORT_USERNAME = "too short username";
+    private final String MESSAGE_INFO_OPEN_CONSOLE =     "============console opened==============";
+    private final String MESSAGE_INFO_CLOSE_CONSOLE =    "============console closed==============";
+    private final String MESSAGE_INFO_CREATED_USERS =    "=============created users==============";
+    private final String MESSAGE_INFO_ENABLED_COMMANDS = "===========enabled commands=============";
+    private final String MESSAGE_INFO_END =              "========================================";
+    private final String MESSAGE_INFO_ENTER_THE_COMMAND = "enter the command -> ";
+    private final String MESSAGE_ERROR_COMMAND_NOT_FOUND = "command not found";
+    private final String MESSAGE_ERROR_USER_NOT_FOUND = "user not found";
+    private final String MESSAGE_ERROR_USER_CLASS_NOT_FOUND = "user class not found";
+    private final String MESSAGE_ERROR_USER_CLASS_NAME_CANNOT_BE_EMPTY = "user classname cannot be empty";
+    private final String MESSAGE_ERROR_USER_NAME_CANNOT_BE_EMPTY = "user name cannot be empty";
+    private final String MESSAGE_SUCCESS = "success!!!";
+    private final String MESSAGE_WARNING = "warning!!!";
+    private final String MESSAGE_ERROR = "error!!!";
+    private final String MESSAGE_WARNING_NOT_FOUND_ANY_USERS = "not found any users";
+    private final String MESSAGE_WARNING_TOO_SHORT_USERNAME = "too short username";
 
-    private static final String MESSAGE_ACTION_INPUT_FIELD_USER_CLASS = "enter classname -> ";
-    private static final String MESSAGE_ACTION_INPUT_FIELD_USER_NAME = "enter username -> ";
-    private static final String MESSAGE_ACTION_INPUT_FIELD_MESSAGE = "enter message -> ";
+    private final String MESSAGE_ACTION_INPUT_FIELD_USER_CLASS = "enter classname -> ";
+    private final String MESSAGE_ACTION_INPUT_FIELD_USER_NAME = "enter username -> ";
+    private final String MESSAGE_ACTION_INPUT_FIELD_MESSAGE = "enter message -> ";
 
-    private static final String MESSAGE_ACTION_GET_MESSAGES = "get messages";
-    private static final String MESSAGE_INFO_GET_MESSAGES =    "=============get messages===============";
-    private static final String MESSAGE_ACTION_UPLOAD_MESSAGES = "upload messages";
-    private static final String MESSAGE_INFO_UPLOAD_MESSAGES = "============upload messages=============";
-    private static final String MESSAGE_ACTION_SEND_MESSAGE = "send message";
-    private static final String MESSAGE_INFO_SEND_MESSAGES =   "=============send messages==============";
-    private static final String MESSAGE_ACTION_ADD_USER = "add user";
-    private static final String MESSAGE_INFO_ADD_USER =        "===============add user=================";
-    private static final String MESSAGE_ACTION_GET_USERS = "get users";
-    private static final String MESSAGE_INFO_GET_USERS =       "===============get users================";
-    private static final String MESSAGE_ACTION_START_CHAT = "start chat";
-    private static final String MESSAGE_INFO_START_CHAT =      "==============start chat================";
-    private static final String MESSAGE_ACTION_CHOICE_USER = "choice user";
-    private static final String MESSAGE_INFO_CHOICE_USER =     "==============choice user===============";
-    private static final String MESSAGE_ACTION_CLOSE_CONSOLE = "close console";
+    private final String MESSAGE_ACTION_GET_MESSAGES = "get messages";
+    private final String MESSAGE_INFO_GET_MESSAGES =    "=============get messages===============";
+    private final String MESSAGE_ACTION_UPLOAD_MESSAGES = "upload messages";
+    private final String MESSAGE_INFO_UPLOAD_MESSAGES = "============upload messages=============";
+    private final String MESSAGE_ACTION_SEND_MESSAGE = "send message";
+    private final String MESSAGE_INFO_SEND_MESSAGES =   "=============send messages==============";
+    private final String MESSAGE_ACTION_ADD_USER = "add user";
+    private final String MESSAGE_INFO_ADD_USER =        "===============add user=================";
+    private final String MESSAGE_ACTION_DELETE_USER = "delete user";
+    private final String MESSAGE_INFO_DELETE_USER =     "==============delete user===============";
+    private final String MESSAGE_ACTION_GET_USERS = "get users";
+    private final String MESSAGE_INFO_GET_USERS =       "===============get users================";
+    private final String MESSAGE_ACTION_START_CHAT = "start chat";
+    private final String MESSAGE_INFO_START_CHAT =      "==============start chat================";
+    private final String MESSAGE_ACTION_CHOICE_USER = "choice user";
+    private final String MESSAGE_INFO_CHOICE_USER =     "==============choice user===============";
+    private final String MESSAGE_ACTION_CLOSE_CONSOLE = "close console";
 
     /**
      * default constructor
@@ -114,6 +116,9 @@ class UserActionHandler {
                     break;
                 case MESSAGE_ACTION_ADD_USER:
                     status = commandAddUser();
+                    break;
+                case MESSAGE_ACTION_DELETE_USER:
+                    status = commandDeleteUser();
                     break;
                 case MESSAGE_ACTION_CHOICE_USER:
                     status = commandChoiceUser();
@@ -194,6 +199,24 @@ class UserActionHandler {
             System.out.println(MESSAGE_INFO_END);
             return COMMAND_STATUS_ERROR;
         }
+    }
+
+    /**
+     * delete user
+     * @return int status
+     */
+    private int commandDeleteUser(){
+        System.out.println(MESSAGE_INFO_DELETE_USER);
+        int status = fillContact();
+        try {
+            service.deleteUser(contact);
+        } catch (RedisMessengerException e) {
+            System.out.println(e.getLocalizedMessage());
+            System.out.println(MESSAGE_INFO_END);
+            return COMMAND_STATUS_ERROR;
+        }
+        System.out.println(MESSAGE_INFO_END);
+        return status;
     }
 
     /**
@@ -359,7 +382,7 @@ class UserActionHandler {
             System.out.println(MESSAGE_ERROR_USER_NAME_CANNOT_BE_EMPTY);
             throw new RedisMessengerException(MESSAGE_ERROR_USER_NAME_CANNOT_BE_EMPTY);
         }
-        return REDIS_KEY_USER_PREFIX_PROPERTY.concat(userClass).concat(":").concat(userName);
+        return String.join(":", REDIS_KEY_USER_PREFIX_PROPERTY, userClass, userName);
     }
 
     /**
@@ -385,6 +408,9 @@ class UserActionHandler {
             }
             if (currentUser.canCreateUser()) {
                 commands.add(MESSAGE_ACTION_ADD_USER);
+            }
+            if (currentUser.canDeleteUser()) {
+                commands.add(MESSAGE_ACTION_DELETE_USER);
             }
         }
         commands.add(MESSAGE_ACTION_CLOSE_CONSOLE);

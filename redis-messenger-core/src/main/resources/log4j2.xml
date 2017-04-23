@@ -13,6 +13,6 @@
             <AppenderRef ref="file"/>
             <AppenderRef ref="Console"/>
         </Root>
-        <Logger name="ru.redisMessenger" level="INFO"/>
+        <Logger name="ru.redisMessenger" level="DEBUG"/>
     </Loggers>
 </Configuration>

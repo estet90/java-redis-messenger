@@ -43,12 +43,16 @@ public abstract class User {
         return (getRights() & Right.CREATE_USER.getValue()) == Right.CREATE_USER.getValue();
     }
 
+    public boolean canDeleteUser(){
+        return (getRights() & Right.DELETE_USER.getValue()) == Right.DELETE_USER.getValue();
+    }
+
     /**
      * user's rights
      */
     enum Right {
 
-        READ(1), WRITE(2), UPLOAD(4), CREATE_USER(8);
+        READ(1), WRITE(2), UPLOAD(4), CREATE_USER(8), DELETE_USER(16);
 
         private int value;
 

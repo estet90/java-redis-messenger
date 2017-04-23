@@ -68,6 +68,32 @@ public class JedisClient {
     }
 
     /**
+     * delete by pattern
+     * @param pattern {@link String} for delete values
+     * @return int countDeletedValues
+     */
+    public int deleteValuesByPattern(String pattern){
+        Set<String> keys = jedis.keys(pattern);
+        for (String key : keys) {
+            jedis.del(key);
+        }
+        int countDeletedValues = keys.size();
+        log.debug("DEL\ndeleted {} values by pattern {}", countDeletedValues, pattern);
+        return countDeletedValues;
+    }
+
+    /**
+     * delete by key
+     * @param key {@link String}
+     * @return countDeletedValues {@link Long}
+     */
+    public Long deleteValuesByKey(String key){
+        Long countDeletedValues = jedis.del(key);
+        log.debug("DEL\ndeleted {} values by key {}", countDeletedValues, key);
+        return countDeletedValues;
+    }
+
+    /**
      * get keys by pattern
      * @param pattern {@link String} for search
      * @return {@link Set<String>} keys

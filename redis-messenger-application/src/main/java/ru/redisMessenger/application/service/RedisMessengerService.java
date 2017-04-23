@@ -22,18 +22,18 @@ import java.util.Set;
 @Log4j2
 public class RedisMessengerService {
 
-    private static final String REDIS_KEY_MESSAGES_PREFIX_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_KEY_MESSAGES_PREFIX.getPropertyName());
-    private static final String REDIS_KEY_USER_PREFIX_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_KEY_USER_PREFIX.getPropertyName());
-    private static final String REDIS_KEY_USERS_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_KEY_USERS.getPropertyName());
-    private static final String REDIS_CHANNEL_CHAT_PREFIX_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_CHANNEL_CHAT_PREFIX.getPropertyName());
-    private static final String REDIS_HASH_PREFIX_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_HASH_PREFIX.getPropertyName());
+    private final String REDIS_KEY_MESSAGES_PREFIX_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_KEY_MESSAGES_PREFIX.getPropertyName());
+    private final String REDIS_KEY_USER_PREFIX_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_KEY_USER_PREFIX.getPropertyName());
+    private final String REDIS_KEY_USERS_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_KEY_USERS.getPropertyName());
+    private final String REDIS_CHANNEL_CHAT_PREFIX_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_CHANNEL_CHAT_PREFIX.getPropertyName());
+    private final String REDIS_HASH_PREFIX_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_HASH_PREFIX.getPropertyName());
 
-    private static final String[] MESSAGE_IGNORABLE_FILTER = new String[]{"messages"};
-    private static final String[] USER_DETAILS_IGNORABLE_FILTER = new String[]{"messages", "description", "dateCreate", "rights"};
+    private final String[] MESSAGE_IGNORABLE_FILTER = new String[]{"messages"};
+    private final String[] USER_DETAILS_IGNORABLE_FILTER = new String[]{"messages", "description", "dateCreate", "rights"};
 
-    private static final FilterProvider USER_ONLY_FILTER_PROVIDER = new SimpleFilterProvider()
+    private final FilterProvider USER_ONLY_FILTER_PROVIDER = new SimpleFilterProvider()
             .addFilter("User", SimpleBeanPropertyFilter.serializeAllExcept(MESSAGE_IGNORABLE_FILTER));
-    private static final FilterProvider MESSAGES_FILTER_PROVIDER = new SimpleFilterProvider()
+    private final FilterProvider MESSAGES_FILTER_PROVIDER = new SimpleFilterProvider()
             .addFilter("User", SimpleBeanPropertyFilter.serializeAllExcept(USER_DETAILS_IGNORABLE_FILTER))
             .addFilter("Message", SimpleBeanPropertyFilter.serializeAll());
 
@@ -72,6 +72,22 @@ public class RedisMessengerService {
         JedisClient.getInstance().setValue(userKey, userStr);
         JedisClient.getInstance().putValues(REDIS_KEY_USERS_PROPERTY, new String[]{userKey});
         return userStr;
+    }
+
+    /**
+     * delete user
+     * @param user {@link User}
+     * @return {@link Long}
+     * @throws RedisMessengerException when {@link User} is not existing or incorrect
+     */
+    public Long deleteUser(User user) throws RedisMessengerException {
+        if (user.getName() == null)
+            throw new RedisMessengerException("username must be filled");
+        String userKey = userKey(user);
+        Long deletedUsersCount = JedisClient.getInstance().deleteValuesByKey(userKey);
+        if (deletedUsersCount == 0L)
+            throw new RedisMessengerException("user with userKey ".concat(userKey).concat(" doesn't exist"));
+        return deletedUsersCount;
     }
 
     /**
@@ -219,7 +235,7 @@ public class RedisMessengerService {
      * @param userToKey {@link String} contact
      * @return {@link String}
      */
-    private String messagesUsersKey(String userFromKey, String userToKey) {
+    String messagesUsersKey(String userFromKey, String userToKey) {
         return String.join(":", REDIS_KEY_MESSAGES_PREFIX_PROPERTY, userFromKey, userToKey);
     }
 
@@ -228,7 +244,7 @@ public class RedisMessengerService {
      * @param userToKey {@link String} contact
      * @return {@link String}
      */
-    private String messagesUserKey(String userToKey) {
+    String messagesUserKey(String userToKey) {
         return String.join(":", REDIS_KEY_MESSAGES_PREFIX_PROPERTY, userToKey);
     }
 
@@ -237,7 +253,7 @@ public class RedisMessengerService {
      * @param userFromKey {@link String} current user
      * @return {@link String}
      */
-    private String hashUserKey(String userFromKey) {
+    String hashUserKey(String userFromKey) {
         return String.join(":", REDIS_HASH_PREFIX_PROPERTY, userFromKey);
     }
 
@@ -246,7 +262,7 @@ public class RedisMessengerService {
      * @param user {@link String} any user
      * @return {@link String}
      */
-    private String userKey(User user) {
+    String userKey(User user) {
         return String.join(":", REDIS_KEY_USER_PREFIX_PROPERTY, user.getClass().getSimpleName(), user.getName());
     }
 
@@ -256,7 +272,7 @@ public class RedisMessengerService {
      * @param userToKey {@link String} contact
      * @return {@link String}
      */
-    private String chatUsersChannel(String userFromKey, String userToKey) {
+    String chatUsersChannel(String userFromKey, String userToKey) {
         return String.join(":", REDIS_CHANNEL_CHAT_PREFIX_PROPERTY, userFromKey, userToKey);
     }
 
@@ -265,7 +281,7 @@ public class RedisMessengerService {
      * @param userToKey {@link String} contact
      * @return {@link String}
      */
-    private String chatUserChannel(String userToKey) {
+    String chatUserChannel(String userToKey) {
         return String.join(":", REDIS_CHANNEL_CHAT_PREFIX_PROPERTY, userToKey);
     }
 

@@ -18,14 +18,14 @@ public class Configuration {
     private static final String PROPERTIES_FILE_NAME = "config.properties";
 
     /**
-     * default private constructor
+     * private constructor for test
      */
     private Configuration(){
         properties = new Properties();
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE_NAME);
         try {
             properties.load(inputStream);
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             log.error(e.getLocalizedMessage());
         }
     }
@@ -44,12 +44,14 @@ public class Configuration {
         return instance;
     }
 
+
     /**
      * get property
      * @param propertyName {@link String} name of property
      * @return {@link String} value of property
      */
     public String getProperty(String propertyName){
+        String property = properties.get(propertyName).toString();
         return properties.get(propertyName).toString();
     }
 

@@ -6,9 +6,6 @@ dependencies{
     compile project(":redis-messenger-core")
 
     compile "redis.clients:jedis:$jedisVersion"
-
-    testCompile "junit:junit:$junitVersion"
-    testCompile "com.github.kstyrc:embedded-redis:$embeddedRedisVersion"
 }
 
 jar {

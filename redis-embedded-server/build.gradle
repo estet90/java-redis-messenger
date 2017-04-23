@@ -1,6 +1,13 @@
 apply plugin: "application"
 
+ext.embeddedRedisVersion = "0.6"
+
 mainClassName = "ru.redisMessenger.server.Server"
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
 
 dependencies{
     compile "com.github.kstyrc:embedded-redis:$embeddedRedisVersion"

@@ -3,7 +3,6 @@ ext.jedisVersion = "2.9.0"
 ext.log4j2Version = "2.6.2"
 ext.jacksonVersion = "2.9.0.pr2"
 ext.jodaTimeVersion = "2.9.6"
-ext.embeddedRedisVersion = "0.6"
 ext.junitVersion = "4.12"
 
 group "ru.redisMessenger"
@@ -16,5 +15,15 @@ subprojects {
         mavenCentral()
         maven {url "https://mvnrepository.com/artifact/org.projectlombok/lombok"}
         maven {url "https://mvnrepository.com/artifact/redis.clients/jedis"}
+    }
+
+    dependencies{
+        testCompile "junit:junit:$junitVersion"
+    }
+
+    test {
+        afterTest { desc, result ->
+            println "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
+        }
     }
 }
