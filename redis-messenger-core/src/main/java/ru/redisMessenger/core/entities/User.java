@@ -25,6 +25,14 @@ public abstract class User {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private Date dateCreate;
 
+    public User(){
+
+    }
+
+    public User(String name){
+        this.name = name;
+    }
+
     protected abstract int getRights();
 
     public boolean canRead(){

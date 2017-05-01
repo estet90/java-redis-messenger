@@ -3,7 +3,7 @@ package ru.redisMessenger.application.util;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,7 +24,7 @@ public class FileUploader {
      */
     public int writeLines(String filePath, Collection<String> text) throws IOException {
         Path file = Paths.get(filePath);
-        Files.write(file, text, Charset.forName("UTF-8"));
+        Files.write(file, text, StandardCharsets.UTF_8);
         return text.size();
     }
 

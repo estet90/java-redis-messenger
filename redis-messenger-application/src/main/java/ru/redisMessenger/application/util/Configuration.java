@@ -1,8 +1,6 @@
 package ru.redisMessenger.application.util;
 
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +16,7 @@ public class Configuration {
     private static final String PROPERTIES_FILE_NAME = "config.properties";
 
     /**
-     * private constructor for test
+     * private constructor
      */
     private Configuration(){
         properties = new Properties();
@@ -51,7 +49,6 @@ public class Configuration {
      * @return {@link String} value of property
      */
     public String getProperty(String propertyName){
-        String property = properties.get(propertyName).toString();
         return properties.get(propertyName).toString();
     }
 

@@ -9,7 +9,6 @@ import ru.redisMessenger.application.util.JedisClient;
 import ru.redisMessenger.core.entities.*;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -30,12 +29,10 @@ public class RedisMessengerServiceTest {
 
         service = new RedisMessengerService();
 
-        User superUser = new SuperUser();
-        superUser.setName("superUser");
+        User superUser = new SuperUser("superUser");
         service.addUser(superUser);
 
-        User advancedUser = new AdvancedUser();
-        advancedUser.setName("advancedUser");
+        User advancedUser = new AdvancedUser("advancedUser");
         service.addUser(advancedUser);
     }
 
@@ -49,10 +46,8 @@ public class RedisMessengerServiceTest {
     @Test
     //предполагается, что префиксы для ключей не должны меняться. в противном случае этот тест не будет проходить
     public void keyConstructor(){
-        User fromUser = new AdvancedUser();
-        fromUser.setName("fromUser");
-        User toUser = new SimpleUser();
-        toUser.setName("toUser");
+        User fromUser = new AdvancedUser("fromUser");
+        User toUser = new SimpleUser("toUser");
 
         String userFromKey = service.userKey(fromUser);
         String userToKey = service.userKey(toUser);
@@ -66,8 +61,7 @@ public class RedisMessengerServiceTest {
 
     @Test
     public void addAndDeleteUser() throws RedisMessengerException {
-        User addedUser = new SimpleUser();
-        addedUser.setName("addedUser");
+        User addedUser = new SimpleUser("addedUser");
         service.addUser(addedUser);
         service.deleteUser(addedUser);
     }
@@ -91,21 +85,4 @@ public class RedisMessengerServiceTest {
         assertArrayEquals(sentMessages.toArray(), receivedMessages.toArray());
     }
 
-    @Test
-    public void users(){
-        User superUser = new SuperUser();
-        superUser.setName("superUser");
-
-        User advancedUser = new AdvancedUser();
-        advancedUser.setName("advancedUser");
-
-        String superUserKey = service.userKey(superUser);
-        String advancedUserKey = service.userKey(advancedUser);
-
-        Set<String> userSet = new HashSet<>();
-        userSet.add(superUserKey);
-        userSet.add(advancedUserKey);
-
-        assertArrayEquals(service.getUsersKeys().toArray(), userSet.toArray());
-    }
 }

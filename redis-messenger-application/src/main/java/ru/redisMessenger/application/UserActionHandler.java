@@ -22,7 +22,6 @@ class UserActionHandler {
     private RedisMessengerService service;
     private User currentUser;
     private User contact;
-    private Set<String> commands;
 
     private final String REDIS_KEY_USER_PREFIX_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_KEY_USER_PREFIX.getPropertyName());
     private final String FILE_OUTPUT_DIRECTORY_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.FILE_OUTPUT_DIRECTORY.getPropertyName());
@@ -52,23 +51,25 @@ class UserActionHandler {
     private final String MESSAGE_ACTION_INPUT_FIELD_USER_NAME = "enter username -> ";
     private final String MESSAGE_ACTION_INPUT_FIELD_MESSAGE = "enter message -> ";
 
-    private final String MESSAGE_ACTION_GET_MESSAGES = "get messages";
+    final String MESSAGE_ACTION_GET_MESSAGES = "get messages";
     private final String MESSAGE_INFO_GET_MESSAGES =    "=============get messages===============";
-    private final String MESSAGE_ACTION_UPLOAD_MESSAGES = "upload messages";
+    final String MESSAGE_ACTION_UPLOAD_MESSAGES = "upload messages";
     private final String MESSAGE_INFO_UPLOAD_MESSAGES = "============upload messages=============";
-    private final String MESSAGE_ACTION_SEND_MESSAGE = "send message";
+    final String MESSAGE_ACTION_SEND_MESSAGE = "send message";
     private final String MESSAGE_INFO_SEND_MESSAGES =   "=============send messages==============";
-    private final String MESSAGE_ACTION_ADD_USER = "add user";
+    final String MESSAGE_ACTION_ADD_USER = "add user";
     private final String MESSAGE_INFO_ADD_USER =        "===============add user=================";
-    private final String MESSAGE_ACTION_DELETE_USER = "delete user";
+    final String MESSAGE_ACTION_DELETE_USER = "delete user";
     private final String MESSAGE_INFO_DELETE_USER =     "==============delete user===============";
-    private final String MESSAGE_ACTION_GET_USERS = "get users";
+    final String MESSAGE_ACTION_GET_USERS = "get users";
     private final String MESSAGE_INFO_GET_USERS =       "===============get users================";
-    private final String MESSAGE_ACTION_START_CHAT = "start chat";
+    final String MESSAGE_ACTION_START_CHAT = "start chat";
     private final String MESSAGE_INFO_START_CHAT =      "==============start chat================";
-    private final String MESSAGE_ACTION_CHOICE_USER = "choice user";
+    final String MESSAGE_ACTION_CHOICE_USER = "choice user";
     private final String MESSAGE_INFO_CHOICE_USER =     "==============choice user===============";
-    private final String MESSAGE_ACTION_CLOSE_CONSOLE = "close console";
+    final String MESSAGE_ACTION_RESET_USER = "reset user";
+    private final String MESSAGE_INFO_RESET_USER =      "==============reset user================";
+    final String MESSAGE_ACTION_CLOSE_CONSOLE = "close console";
 
     /**
      * default constructor
@@ -90,8 +91,7 @@ class UserActionHandler {
             System.out.println(MESSAGE_INFO_END);
         } else {
             System.out.println(MESSAGE_WARNING_NOT_FOUND_ANY_USERS);
-            User user = new SuperUser();
-            user.setName("super");
+            User user = new SuperUser("super");
             try {
                 service.addUser(user);
             } catch (RedisMessengerException e) {
@@ -106,7 +106,9 @@ class UserActionHandler {
      * set of commands
      */
     private void command() {
-        printEnableCommandsSet();
+        System.out.println(MESSAGE_INFO_ENABLED_COMMANDS);
+        Set<String> commands = enabledCommandsSet(currentUser);
+        commands.forEach(System.out::println);
         String command = System.console().readLine(MESSAGE_INFO_ENTER_THE_COMMAND).toLowerCase().trim();
         int status = COMMAND_STATUS_SUCCESS;
         if (commands.contains(command)) {
@@ -137,6 +139,9 @@ class UserActionHandler {
                     break;
                 case MESSAGE_ACTION_CLOSE_CONSOLE:
                     System.out.println(MESSAGE_INFO_CLOSE_CONSOLE);
+                    break;
+                case MESSAGE_ACTION_RESET_USER:
+                    status = commandResetUser();
                     break;
                 default:
                     System.out.println(MESSAGE_ERROR_COMMAND_NOT_FOUND);
@@ -300,6 +305,7 @@ class UserActionHandler {
         Set<String> messages = service.getMessages(currentUser, contact);
         try {
             new FileUploader().writeLines(uploadedFileName(), messages);
+            log.debug(uploadedFileName());
             System.out.println(MESSAGE_INFO_END);
         } catch (IOException e) {
             System.out.println(e.getLocalizedMessage());
@@ -333,6 +339,17 @@ class UserActionHandler {
     }
 
     /**
+     * reset currentUser
+     * @return int status
+     */
+    private int commandResetUser(){
+        System.out.println(MESSAGE_INFO_RESET_USER);
+        currentUser = null;
+        System.out.println(MESSAGE_INFO_END);
+        return COMMAND_STATUS_SUCCESS;
+    }
+
+    /**
      * create name for uploaded file
      * @return {@link String} filename
      */
@@ -340,7 +357,7 @@ class UserActionHandler {
         LocalDateTime date = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddhhmmssSSS");
         String dateStr = date.format(formatter);
-        return String.join("_", FILE_OUTPUT_DIRECTORY_PROPERTY, currentUser.getName(), contact.getName(), dateStr).concat(".txt");
+        return FILE_OUTPUT_DIRECTORY_PROPERTY.concat(String.join("_", currentUser.getName(), contact.getName(), dateStr).concat(".txt"));
     }
 
     /**
@@ -386,35 +403,37 @@ class UserActionHandler {
     }
 
     /**
-     * print command set for current user
+     * set of enabled commands for current user
+     * @param user {@link User} current user
+     * @return {@link Set<String>} commands
      */
-    private void printEnableCommandsSet() {
-        System.out.println(MESSAGE_INFO_ENABLED_COMMANDS);
-        commands = new HashSet<>();
+    Set<String> enabledCommandsSet(User user) {
+        Set<String> commands = new HashSet<>();
         commands.add(MESSAGE_ACTION_GET_USERS);
         commands.add(MESSAGE_ACTION_CHOICE_USER);
-        if (currentUser == null) {
+        if (user == null) {
             commands.add(MESSAGE_ACTION_ADD_USER);
         } else {
-            if (currentUser.canRead()) {
+            commands.add(MESSAGE_ACTION_RESET_USER);
+            if (user.canRead()) {
                 commands.add(MESSAGE_ACTION_GET_MESSAGES);
-            }
-            if (currentUser.canWrite()) {
-                commands.add(MESSAGE_ACTION_SEND_MESSAGE);
                 commands.add(MESSAGE_ACTION_START_CHAT);
             }
-            if (currentUser.canUpload()) {
+            if (user.canWrite()) {
+                commands.add(MESSAGE_ACTION_SEND_MESSAGE);
+            }
+            if (user.canUpload()) {
                 commands.add(MESSAGE_ACTION_UPLOAD_MESSAGES);
             }
-            if (currentUser.canCreateUser()) {
+            if (user.canCreateUser()) {
                 commands.add(MESSAGE_ACTION_ADD_USER);
             }
-            if (currentUser.canDeleteUser()) {
+            if (user.canDeleteUser()) {
                 commands.add(MESSAGE_ACTION_DELETE_USER);
             }
         }
         commands.add(MESSAGE_ACTION_CLOSE_CONSOLE);
-        commands.forEach(System.out::println);
+        return commands;
     }
 
 }
