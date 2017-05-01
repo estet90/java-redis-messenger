@@ -6,9 +6,6 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * serialize/deserialize
