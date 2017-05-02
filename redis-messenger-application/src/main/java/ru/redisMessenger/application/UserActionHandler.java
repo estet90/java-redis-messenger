@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -40,6 +41,7 @@ class UserActionHandler {
     private final String MESSAGE_ERROR_USER_NOT_FOUND = "user not found";
     private final String MESSAGE_ERROR_USER_CLASS_NOT_FOUND = "user class not found";
     private final String MESSAGE_ERROR_USER_CLASS_NAME_CANNOT_BE_EMPTY = "user classname cannot be empty";
+    private final String MESSAGE_ERROR_CURRENT_USER_CANNOT_BE_DELETED = "current user can not be deleted";
     private final String MESSAGE_ERROR_USER_NAME_CANNOT_BE_EMPTY = "user name cannot be empty";
     private final String MESSAGE_SUCCESS = "success!!!";
     private final String MESSAGE_WARNING = "warning!!!";
@@ -213,6 +215,11 @@ class UserActionHandler {
     private int commandDeleteUser(){
         System.out.println(MESSAGE_INFO_DELETE_USER);
         int status = fillContact();
+        if (Objects.equals(contact.getName(), currentUser.getName()) && contact.getClass() == currentUser.getClass()){
+            System.out.println(MESSAGE_ERROR_CURRENT_USER_CANNOT_BE_DELETED);
+            System.out.println(MESSAGE_INFO_END);
+            return COMMAND_STATUS_ERROR;
+        }
         try {
             service.deleteUser(contact);
         } catch (RedisMessengerException e) {
