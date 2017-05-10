@@ -1,4 +1,4 @@
-//apply plugin: "application"
+apply plugin: "application"
 
 ext.embeddedRedisVersion = "0.6"
 
