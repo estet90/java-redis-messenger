@@ -8,6 +8,7 @@ import ru.redisMessenger.application.util.FileUploader;
 import ru.redisMessenger.core.entities.*;
 
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
@@ -21,7 +22,6 @@ class UserActionHandler {
 
     private RedisMessengerService service;
     private User currentUser;
-    private User contact;
 
     private final String REDIS_KEY_USER_PREFIX_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.REDIS_KEY_USER_PREFIX.getPropertyName());
     private final String FILE_OUTPUT_DIRECTORY_PROPERTY = Configuration.getInstance().getProperty(Configuration.Property.FILE_OUTPUT_DIRECTORY.getPropertyName());
@@ -212,7 +212,9 @@ class UserActionHandler {
      */
     private int commandDeleteUser(){
         System.out.println(MESSAGE_INFO_DELETE_USER);
-        int status = fillContact();
+        User contact = fillContact();
+        if (contact == null)
+            return COMMAND_STATUS_ERROR;
         try {
             service.deleteUser(contact);
         } catch (RedisMessengerException e) {
@@ -221,7 +223,7 @@ class UserActionHandler {
             return COMMAND_STATUS_ERROR;
         }
         System.out.println(MESSAGE_INFO_END);
-        return status;
+        return COMMAND_STATUS_SUCCESS;
     }
 
     /**
@@ -277,9 +279,11 @@ class UserActionHandler {
      */
     private int commandStartChat() {
         System.out.println(MESSAGE_INFO_START_CHAT);
-        int status = fillContact();
+        User contact = fillContact();
+        if (contact == null)
+            return COMMAND_STATUS_ERROR;
         service.subscribe(currentUser, contact);
-        return status;
+        return COMMAND_STATUS_SUCCESS;
     }
 
     /**
@@ -288,11 +292,13 @@ class UserActionHandler {
      */
     private int commandGetMessages() {
         System.out.println(MESSAGE_INFO_GET_MESSAGES);
-        int status = fillContact();
+        User contact = fillContact();
+        if (contact == null)
+            return COMMAND_STATUS_ERROR;
         Set<String> messages = service.getMessages(currentUser, contact);
         messages.forEach(System.out::println);
         System.out.println(MESSAGE_INFO_END);
-        return status;
+        return COMMAND_STATUS_SUCCESS;
     }
 
     /**
@@ -301,18 +307,20 @@ class UserActionHandler {
      */
     private int commandUploadMessages() {
         System.out.println(MESSAGE_INFO_UPLOAD_MESSAGES);
-        int status = fillContact();
+        User contact = fillContact();
+        if (contact == null)
+            return COMMAND_STATUS_ERROR;
         Set<String> messages = service.getMessages(currentUser, contact);
         try {
-            new FileUploader().writeLines(uploadedFileName(), messages);
-            log.debug(uploadedFileName());
+            new FileUploader().writeLines(uploadedFileName(currentUser.getName(), contact.getName()), messages);
+            log.debug(uploadedFileName(currentUser.getName(), contact.getName()));
             System.out.println(MESSAGE_INFO_END);
-        } catch (IOException e) {
+        } catch (IOException | InvalidPathException e) {
             System.out.println(e.getLocalizedMessage());
             System.out.println(MESSAGE_INFO_END);
             return COMMAND_STATUS_ERROR;
         }
-        return status;
+        return COMMAND_STATUS_SUCCESS;
     }
 
     /**
@@ -321,7 +329,9 @@ class UserActionHandler {
      */
     private int commandSendMessage() {
         System.out.println(MESSAGE_INFO_SEND_MESSAGES);
-        int status = fillContact();
+        User contact = fillContact();
+        if (contact == null)
+            return COMMAND_STATUS_ERROR;
         Message message = new Message();
         message.setFrom(currentUser);
         message.setTo(contact);
@@ -335,7 +345,7 @@ class UserActionHandler {
             System.out.println(MESSAGE_INFO_END);
             return COMMAND_STATUS_ERROR;
         }
-        return status;
+        return COMMAND_STATUS_SUCCESS;
     }
 
     /**
@@ -353,34 +363,36 @@ class UserActionHandler {
      * create name for uploaded file
      * @return {@link String} filename
      */
-    private String uploadedFileName(){
+    private String uploadedFileName(String currentUserName, String contactName){
         LocalDateTime date = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddhhmmssSSS");
         String dateStr = date.format(formatter);
-        return FILE_OUTPUT_DIRECTORY_PROPERTY.concat(String.join("_", currentUser.getName(), contact.getName(), dateStr).concat(".txt"));
+        return FILE_OUTPUT_DIRECTORY_PROPERTY.concat(String.join("_", currentUserName, contactName, dateStr).concat(".txt"));
     }
 
     /**
      * fill contact variable
      * @return int status
      */
-    private int fillContact() {
+    private User fillContact() {
         String userToKey;
+        User contact;
         try {
             userToKey = getUserKey();
         } catch (RedisMessengerException e) {
-            return COMMAND_STATUS_ERROR;
+            System.out.println(e.getLocalizedMessage());
+            return null;
         }
         try {
             contact = service.getUser(userToKey);
         } catch (RedisMessengerException e) {
             System.out.println(MESSAGE_ERROR_USER_NOT_FOUND);
-            return COMMAND_STATUS_WARNING;
+            return null;
         } catch (IOException e) {
             System.out.println(e.getLocalizedMessage());
-            return COMMAND_STATUS_ERROR;
+            return null;
         }
-        return COMMAND_STATUS_SUCCESS;
+        return contact;
     }
 
     /**

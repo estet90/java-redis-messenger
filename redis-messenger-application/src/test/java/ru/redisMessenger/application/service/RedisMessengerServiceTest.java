@@ -60,10 +60,40 @@ public class RedisMessengerServiceTest {
     }
 
     @Test
-    public void addAndDeleteUser() throws RedisMessengerException {
+    public void addAndDeleteUser() throws RedisMessengerException, IOException {
+        User addedUser = new SimpleUser("addedUser");
+        service.addUser(addedUser);
+        assertNotNull(service.getUser(service.userKey(addedUser)));
+        service.deleteUser(addedUser);
+    }
+
+    @Test(expected = RedisMessengerException.class)
+    public void userDoesNotExistInGetUserMethod() throws RedisMessengerException, IOException{
         User addedUser = new SimpleUser("addedUser");
         service.addUser(addedUser);
         service.deleteUser(addedUser);
+        service.getUser(service.userKey(addedUser));
+    }
+
+    @Test(expected = RedisMessengerException.class)
+    public void userDoesNotExistInDeleteUserMethod() throws RedisMessengerException, IOException{
+        User addedUser = new SimpleUser("addedUser");
+        service.addUser(addedUser);
+        service.deleteUser(addedUser);
+        service.deleteUser(addedUser);
+    }
+
+    @Test(expected = RedisMessengerException.class)
+    public void usernameMustBeFilled() throws RedisMessengerException, IOException{
+        User addedUser = new SimpleUser();
+        service.addUser(addedUser);
+    }
+
+    @Test(expected = RedisMessengerException.class)
+    public void userAlreadyExists() throws RedisMessengerException, IOException{
+        User addedUser = new SimpleUser("addedUser");
+        service.addUser(addedUser);
+        service.addUser(addedUser);
     }
 
     @Test

@@ -53,7 +53,7 @@ public class RedisMessengerService {
     /**
      * add new {@link User}
      * @param user {@link User} created user
-     * @return userKey {@link String} userKey({@link String} user)
+     * @return {@link String} userKey
      * @throws RedisMessengerException when {@link User} is existing or incorrect
      */
     public String addUser(User user) throws RedisMessengerException {
@@ -105,7 +105,7 @@ public class RedisMessengerService {
         String userToKey = userKey(userTo);
         String userToValue = JedisClient.getInstance().getValue(userToKey);
         if (userToValue == null)
-            throw new RedisMessengerException("user with userKey ".concat(userKey(userTo)).concat(" doesn't exist"));
+            throw new RedisMessengerException("user with userKey ".concat(userToKey).concat(" doesn't exist"));
         String messageValue = null;
         try {
             messageValue = new JacksonHelper<Message>(MESSAGES_FILTER_PROVIDER).getSerializedObject(message);

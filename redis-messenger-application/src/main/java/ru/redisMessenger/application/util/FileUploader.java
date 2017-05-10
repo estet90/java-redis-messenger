@@ -19,8 +19,8 @@ public class FileUploader {
      * upload
      * @param filePath {@link String} path to target file
      * @param text {@link Collection<String>} of messages
-     * @return count lines in new file as int
-     * @throws IOException when directory doesn't exist
+     * @return int count lines in new file as int
+     * @throws IOException when directory is incorrect
      */
     public int writeLines(String filePath, Collection<String> text) throws IOException {
         Path file = Paths.get(filePath);

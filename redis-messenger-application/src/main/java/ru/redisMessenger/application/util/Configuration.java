@@ -62,11 +62,20 @@ public class Configuration {
 
         private String propertyName;
 
+
+        /**
+         * get property name
+         * @return {@link String} propertyName
+         */
         public String getPropertyName(){
             return this.propertyName;
         }
 
-        private Property(String propertyName){
+        /**
+         * default constructor
+         * @param propertyName {@link String}
+         */
+        Property(String propertyName){
             this.propertyName = propertyName;
         }
     }

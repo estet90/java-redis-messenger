@@ -6,7 +6,6 @@ import ru.redisMessenger.core.entities.SimpleUser;
 import ru.redisMessenger.core.entities.SuperUser;
 import ru.redisMessenger.core.entities.User;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.*;
