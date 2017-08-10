@@ -27,7 +27,7 @@ public class JedisClient {
         }
     }
 
-    private static volatile JedisClient instance;
+    private static JedisClient instance;
 
     /**
      * method for get instance of {@link JedisClient}

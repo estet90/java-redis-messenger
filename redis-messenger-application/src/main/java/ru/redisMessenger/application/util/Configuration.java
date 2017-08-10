@@ -28,7 +28,7 @@ public class Configuration {
         }
     }
 
-    private static volatile Configuration instance;
+    private static Configuration instance;
 
     /**
      * method for get instance of {@link Configuration}
